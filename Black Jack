@@ -1,0 +1,170 @@
+##BlackJack - By Rickard Maus
+
+import random
+
+deck = {"ace1" : 1, "ace2" : 1, "ace3" : 1, "ace4" : 1, "two1" : 2, "two2" : 2, "two3" : 2, "two4" : 2,
+       "thr1" : 3, "thr2" : 3, "thr3" : 3, "thr4" : 3, "for1" : 4, "for2" : 4, "for3" : 4, "for4" : 4,
+       "fiv1" : 5, "fiv2" : 5, "fiv3" : 5, "fiv4" : 5, "six1" : 6, "six2" : 6, "six3" : 6, "six4" : 6,
+       "sev1" : 7, "sev2" : 7, "sev3" : 7, "sev4" : 7, "eit1" : 8, "eit2" : 8, "eit3" : 8, "eit4" : 8,
+       "nin1" : 9, "nin2" : 9, "nin3" : 9, "nin4" : 9, "ten1" : 10, "ten2" : 10, "ten3" : 10, "ten4" : 10,
+       "J1" : 10, "J2" : 10, "J3" : 10, "J4" : 10, "Q1" : 10, "Q2" : 10, "Q3" : 10, "Q4" : 10,
+       "K1" : 10, "K2" : 10, "K3" : 10, "K4" : 10}
+
+bj_ace = ("ace1", "ace2", "ace3", "ace4")
+bj_ten = ("ten1", "ten2", "ten3", "ten4", "J1", "J2", "J3", "J4", "Q1", "Q2", "Q3", "Q4", "K1", "K2", "K3", "K4")
+money = 5000
+play = True 
+
+
+def player_hand_count():
+    global Player_hand_size
+    Player_hand_size = 0
+    P_hand_s = len(Player_hand)
+    for n in range(0, P_hand_s):
+        Player_hand_size = Player_hand_size + deck[Player_hand[n]]
+
+
+def dealer_hand_count():
+    global Dealer_hand_size
+    Dealer_hand_size = 0
+    D_hand_s = len(Dealer_hand)
+    for n in range(0, D_hand_s):
+        Dealer_hand_size = Dealer_hand_size + deck[Dealer_hand[n]]
+
+
+def win():
+    global money
+    global bet_mon
+    money = money + 2 * bet_mon
+    print("Player won! - Money: " + str(money))
+
+
+def tie():
+    global money
+    global bet_mon
+    money = money + bet_mon
+    print("Tie! - Money: " + str(money))
+
+
+def bet():
+    global bet_mon
+    while (bet_mon < 30) or (bet_mon > 300):
+        bet_mon = int(input("How much would you like to bet? (Minimum 30, Maximum 300): "))
+        print("\n")
+    global money
+    money = money - bet_mon
+    
+    
+def tally():
+    print("Dealers hand: [X]", end=" ")
+    d_h_s = len(Dealer_hand)
+    for x in range(1, d_h_s):
+        print(Dealer_hand[x], end=" ")
+    print("\n")
+    print("Player hand:", end=" ")
+    p_h_s = len(Player_hand)
+    for x in range(0, p_h_s):
+        print(Player_hand[x], end=" ")
+    print("\n")
+
+
+def bust(x):
+    Bust = 0
+    hand_s = len(x)
+    global lose_B
+    global money
+    for n in range(0, hand_s):
+        Bust = Bust + deck[x[n]]
+    if (Bust > 21) and (x == Player_hand):
+        print("Player lost! - Money: " + str(money))
+        lose_B = True
+        return
+    elif (Bust > 21) and (x == Dealer_hand):
+        win()
+        return
+
+
+def game_start():
+    bet()
+    for x in range(0,4):
+        deal(x)
+    bj_check_P()
+
+
+def deal(x):
+    draw = ''.join(random.sample(deck_L,1))
+    deck_L.remove(draw)
+    if x%2 == 1:
+        Player_hand.append(draw)
+    else:
+        Dealer_hand.append(draw)
+
+
+def bj_check_P():
+    player_hand_count()
+    if ((Player_hand[0] in bj_ace) or (Player_hand[1] in bj_ace)) and ((Player_hand[0] in bj_ten) or (Player_hand[1] in bj_ten)):
+        print("BLACKJACK")
+        global bj_win
+        bj_win = True
+        return
+
+
+def mid_game():
+    tally()
+    global hold
+    global lose_B
+    while hold == False:
+        if lose_B == False:
+            hold = bool(int(input("Do you wish to hold?\n(Yes-1, No-0): ")))
+            if hold == False:
+                deal(1)
+                tally()
+                bust(Player_hand)
+        else:
+            print("\n")
+            return
+        
+
+def end_game():
+    dealer_hand_count()
+    player_hand_count()
+    while Dealer_hand_size <= Player_hand_size:
+        if Dealer_hand_size == Player_hand_size:
+            tie()
+            return
+        else:
+            deal(0)
+            dealer_hand_count()
+            player_hand_count()
+            bust(Dealer_hand)
+    if (Dealer_hand_size > Player_hand_size) and (Dealer_hand_size < 22):
+        print("Player lost! - Money: " + str(money))
+
+
+def game():
+    game_start()
+    if bj_win == True:
+        win()
+        return
+    mid_game()
+    if lose_B == True:
+        return
+    end_game()
+    print(Dealer_hand)
+  
+    
+while play == True:
+    deck_L = list(deck)
+    Player_hand = []
+    Dealer_hand = []
+    bj_win = False
+    hold = False
+    lose_B = False
+    bet_mon = 0
+    game()
+    play = bool(int(input("Do you wish to play again?\n(Yes-1, No-0): ")))
+
+
+print(Dealer_hand)
+print(len(deck_L))
+print(money)
